@@ -62,6 +62,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         edited.value = post
     }
 
+
     fun changeContent(content: String) {
         val text = content.trim()
         if (edited.value?.content == text) {
