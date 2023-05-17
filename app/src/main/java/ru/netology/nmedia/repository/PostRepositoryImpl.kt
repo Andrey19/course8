@@ -50,36 +50,32 @@ class PostRepositoryImpl : PostRepository {
             }
     }
 
-    override fun likeById(id: Long): Post?{
-        val post = getPostById(id)
-        if (post != null) {
-            if (post.likedByMe) {
-                val request: Request = Request.Builder()
-                    .delete()
-                    .url("${BASE_URL}/api/posts/$id/likes")
-                    .build()
+    override fun likeById(id: Long): Post {
+        val request: Request = Request.Builder()
+            .post(EMPTY_REQUEST)
+            .url("${BASE_URL}/api/slow/posts/$id/likes")
+            .build()
 
-                return client.newCall(request)
-                    .execute()
-                    .let { it.body?.string() ?: throw RuntimeException("body is null") }
-                    .let {
-                        gson.fromJson(it, typePostToken.type)
-                    }
-            } else {
-                val request: Request = Request.Builder()
-                    .post(EMPTY_REQUEST)
-                    .url("${BASE_URL}/api/posts/$id/likes")
-                    .build()
-
-                return client.newCall(request)
-                    .execute()
-                    .let { it.body?.string() ?: throw RuntimeException("body is null") }
-                    .let {
-                        gson.fromJson(it, typePostToken.type)
-                    }
+        return client.newCall(request)
+            .execute()
+            .let { it.body?.string() ?: throw RuntimeException("body is null") }
+            .let {
+                gson.fromJson(it, typePostToken.type)
             }
-        }
-        return null
+    }
+
+    override fun unLikeById(id: Long): Post {
+        val request: Request = Request.Builder()
+            .delete()
+            .url("${BASE_URL}/api/slow/posts/$id/likes")
+            .build()
+
+        return client.newCall(request)
+            .execute()
+            .let { it.body?.string() ?: throw RuntimeException("body is null") }
+            .let {
+                gson.fromJson(it, typePostToken.type)
+            }
     }
 
     override fun save(post: Post) {
