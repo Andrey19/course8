@@ -41,7 +41,7 @@ class PostRepositoryImpl : PostRepository {
             }
     }
 
-    override fun getAllAsync(callback: PostRepository.GetAllCallback) {
+    override fun getAllAsync(callback: PostRepository.CommonCallback<List<Post>>) {
         val request: Request = Request.Builder()
             .url("${BASE_URL}/api/slow/posts")
             .build()
@@ -64,20 +64,6 @@ class PostRepositoryImpl : PostRepository {
     }
 
 
-
-    fun getPostById(id: Long): Post? {
-        val request: Request = Request.Builder()
-            .url("${BASE_URL}/api/posts/$id")
-            .build()
-
-        return client.newCall(request)
-            .execute()
-            .let { it.body?.string() ?: throw RuntimeException("body is null") }
-            .let {
-                gson.fromJson(it, typePostToken.type)
-            }
-    }
-
     override fun likeById(id: Long): Post {
         val request: Request = Request.Builder()
             .post(EMPTY_REQUEST)
@@ -92,7 +78,7 @@ class PostRepositoryImpl : PostRepository {
             }
     }
 
-    override fun likeByIdAsync(id: Long, callback: PostRepository.LikeCallback) {
+    override fun likeByIdAsync(id: Long, callback: PostRepository.CommonCallback<Post>) {
         val request: Request = Request.Builder()
             .post(EMPTY_REQUEST)
             .url("${BASE_URL}/api/slow/posts/$id/likes")
@@ -115,7 +101,7 @@ class PostRepositoryImpl : PostRepository {
             })
     }
 
-    override fun unLikeByIdAsync(id: Long, callback: PostRepository.LikeCallback) {
+    override fun unLikeByIdAsync(id: Long, callback: PostRepository.CommonCallback<Post>) {
         val request: Request = Request.Builder()
             .delete()
             .url("${BASE_URL}/api/slow/posts/$id/likes")
@@ -164,7 +150,7 @@ class PostRepositoryImpl : PostRepository {
 
     }
 
-    override fun saveAsync(post: Post, callback: PostRepository.SaveCallback) {
+    override fun saveAsync(post: Post, callback: PostRepository.CommonCallback<Unit>) {
         val request: Request = Request.Builder()
             .post(gson.toJson(post).toRequestBody(jsonType))
             .url("${BASE_URL}/api/posts")
@@ -174,7 +160,7 @@ class PostRepositoryImpl : PostRepository {
             .enqueue(object : Callback {
                 override fun onResponse(call: Call, response: Response) {
                     try {
-                        callback.onSuccess()
+                        callback.onSuccess(Unit)
                     } catch (e: Exception) {
                         callback.onError(e)
                     }
@@ -198,7 +184,7 @@ class PostRepositoryImpl : PostRepository {
 
     }
 
-    override fun removeByIdAsync(id: Long, callback: PostRepository.RemoveCallback) {
+    override fun removeByIdAsync(id: Long, callback: PostRepository.CommonCallback<Unit>) {
         val request: Request = Request.Builder()
             .delete()
             .url("${BASE_URL}/api/posts/$id")
@@ -208,7 +194,7 @@ class PostRepositoryImpl : PostRepository {
             .enqueue(object : Callback {
                 override fun onResponse(call: Call, response: Response) {
                     try {
-                        callback.onSuccess()
+                        callback.onSuccess(Unit)
                     } catch (e: Exception) {
                         callback.onError(e)
                     }
