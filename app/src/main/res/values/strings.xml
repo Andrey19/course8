@@ -13,6 +13,7 @@
     <string name="chooser_share_post">Share post</string>
     <string name="add_post">Add post</string>
     <string name="retry_loading">Retry</string>
+    <string name="play">play</string>
     <string name="empty_posts">There are no posts.\nIf you create a new post, it will appear here</string>
     <string name="error_loading">Something went wrong. Try again later</string>
     <string name="save">Save</string>

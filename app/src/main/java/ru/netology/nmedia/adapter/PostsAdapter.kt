@@ -1,14 +1,22 @@
 package ru.netology.nmedia.adapter
 
+import android.R.attr.fragment
+import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.Target
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
+import ru.netology.nmedia.dto.AttachmentType
 import ru.netology.nmedia.dto.Post
+
 
 interface OnInteractionListener {
     fun onLike(post: Post) {}
@@ -45,6 +53,39 @@ class PostViewHolder(
             like.isChecked = post.likedByMe
             like.text = "${post.likes}"
 
+            if (post.attachment == null || post.attachment!!.url.isEmpty()){
+                attachment.visibility = View.GONE
+                attachmentImage.visibility = View.GONE
+            } else{
+                attachmentImage.visibility = View.VISIBLE
+                if (post.attachment!!.type == AttachmentType.IMAGE) {
+                  attachment.visibility = View.GONE
+                }  else{
+                  attachment.visibility = View.VISIBLE
+                }
+                val url = "http://10.0.2.2:9999/images/${post.attachment!!.url}"
+
+                Glide.with(binding.attachmentImage)
+                    .load(url)
+                    .placeholder(R.drawable.ic_loading_100dp)
+                    .error(R.drawable.ic_error_100dp)
+                    .timeout(10_000)
+                    .into(binding.attachmentImage)
+            }
+            if (post.authorAvatar.isNotEmpty()) {
+                val url = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
+                val options = RequestOptions()
+                options.circleCrop()
+
+
+                Glide.with(binding.avatar)
+                    .load(url)
+                    .apply(options)
+                    .placeholder(R.drawable.ic_loading_100dp)
+                    .error(R.drawable.ic_error_100dp)
+                    .timeout(10_000)
+                    .into(binding.avatar)
+            }
             menu.setOnClickListener {
                 PopupMenu(it.context, it).apply {
                     inflate(R.menu.options_post)
