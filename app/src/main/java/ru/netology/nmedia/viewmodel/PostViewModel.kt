@@ -4,7 +4,9 @@ import android.app.Application
 import androidx.lifecycle.*
 import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.model.ErrorType
 import ru.netology.nmedia.model.FeedModel
+import ru.netology.nmedia.model.PostCreatedModel
 import ru.netology.nmedia.repository.*
 import ru.netology.nmedia.util.SingleLiveEvent
 
@@ -26,8 +28,8 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     val data: LiveData<FeedModel>
         get() = _data
     val edited = MutableLiveData(empty)
-    private val _postCreated = SingleLiveEvent<Unit>()
-    val postCreated: LiveData<Unit>
+    private val _postCreated = SingleLiveEvent<PostCreatedModel>()
+    val postCreated: LiveData<PostCreatedModel>
         get() = _postCreated
 
     init {
@@ -42,19 +44,20 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             override fun onError(e: Exception) {
-                _data.postValue(FeedModel(error = true))
+                _data.postValue(FeedModel(error = ErrorType.LOAD))
             }
         })
     }
 
     fun save() {
-        repository.saveAsync(edited.value!!, object : PostRepository.CommonCallback<Unit> {
-            override fun onSuccess(t:Unit) {
-                _postCreated.postValue(Unit)
+        repository.saveAsync(edited.value!!, object : PostRepository.CommonCallback<Post> {
+            override fun onSuccess(t:Post) {
+                _postCreated.postValue(PostCreatedModel(post = t))
                 edited.value = empty
             }
 
             override fun onError(e: Exception) {
+                _postCreated.postValue(PostCreatedModel(error = ErrorType.SAVE))
             }
         })
     }
@@ -99,7 +102,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                                 likedByMe = postLocal.likedByMe,
                                 likes = postLocal.likes
                             )
-                        }))
+                        },error = ErrorType.DISLIKE))
                     }
                 })
             } else {
@@ -119,7 +122,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                                 likedByMe = postLocal.likedByMe,
                                 likes = postLocal.likes
                             )
-                        }))
+                        },error = ErrorType.LIKE))
                     }
                 })
             }
@@ -138,7 +141,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             override fun onError(e: Exception) {
-                _data.postValue(_data.value?.copy(posts = old))
+                _data.postValue(_data.value?.copy(posts = old, error = ErrorType.REMOVE))
             }
         })
     }

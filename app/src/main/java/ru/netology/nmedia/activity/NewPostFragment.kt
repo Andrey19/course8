@@ -7,7 +7,9 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.databinding.FragmentNewPostBinding
+import ru.netology.nmedia.model.ErrorType
 import ru.netology.nmedia.util.AndroidUtils
 import ru.netology.nmedia.util.StringArg
 import ru.netology.nmedia.viewmodel.PostViewModel
@@ -40,8 +42,14 @@ class NewPostFragment : Fragment() {
             AndroidUtils.hideKeyboard(requireView())
         }
         viewModel.postCreated.observe(viewLifecycleOwner) {
-            viewModel.loadPosts()
-            findNavController().navigateUp()
+            if(it.error == ErrorType.SAVE) {
+                Snackbar.make(binding.root, "Error create post", Snackbar.LENGTH_INDEFINITE)
+                    .setAction("Ok") { }
+                    .show()
+            }else{
+                viewModel.loadPosts()
+                findNavController().navigateUp()
+            }
         }
         return binding.root
     }
