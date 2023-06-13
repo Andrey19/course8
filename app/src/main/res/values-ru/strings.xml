@@ -15,6 +15,12 @@
     <string name="add_post">Добавить пост</string>
     <string name="retry_loading">Повторить</string>
     <string name="play">play</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="error_saving">Error saving. Try again later</string>
+    <string name="error_like">Like error. Try again later</string>
+    <string name="error_unlike">Unlike error. Try again later</string>
+    <string name="error_remove">Remove error. Try again later</string>
     <string name="empty_posts">Постов нет.\nЕсли создадите новый пост, то он появится здесь</string>
     <string name="error_loading">Что-то пошло не так. Попробуйте позднее</string>
     <string name="save">Сохранить</string>

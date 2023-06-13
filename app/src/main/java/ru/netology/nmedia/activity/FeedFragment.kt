@@ -55,34 +55,40 @@ class FeedFragment : Fragment() {
             }
         })
         binding.list.adapter = adapter
+        viewModel.dataState.observe(viewLifecycleOwner) { state ->
+            binding.progress.isVisible = state.loading
+            binding.swiperefresh.isRefreshing = state.refreshing
+            when(state.error) {
+                ErrorType.LOAD ->
+                    Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_INDEFINITE)
+                        .setAction(R.string.retry_loading) { viewModel.loadPosts() }
+                        .show()
+                ErrorType.REMOVE ->
+                    Snackbar.make(binding.root, R.string.error_remove, Snackbar.LENGTH_INDEFINITE)
+                        .setAction(R.string.ok) { }
+                        .show()
+                ErrorType.SAVE ->
+                    Snackbar.make(binding.root, R.string.error_saving, Snackbar.LENGTH_INDEFINITE)
+                        .setAction(R.string.ok) { }
+                        .show()
+                ErrorType.LIKE ->
+                    Snackbar.make(binding.root, R.string.error_like, Snackbar.LENGTH_INDEFINITE)
+                        .setAction(R.string.ok) { }
+                        .show()
+                ErrorType.DISLIKE ->
+                    Snackbar.make(binding.root, R.string.error_unlike, Snackbar.LENGTH_INDEFINITE)
+                        .setAction(R.string.ok) { }
+                        .show()
+                else -> {}
+            }
+        }
         viewModel.data.observe(viewLifecycleOwner) { state ->
             adapter.submitList(state.posts)
-            binding.progress.isVisible = state.loading
-            binding.errorGroup.isVisible = state.error == ErrorType.LOAD
             binding.emptyText.isVisible = state.empty
-            when (state.error) {
-                ErrorType.DISLIKE ->
-                    Snackbar.make(binding.root, "Error dislike post", Snackbar.LENGTH_INDEFINITE)
-                        .setAction("Ok") { }
-                        .show()
-
-                ErrorType.LIKE ->
-                    Snackbar.make(binding.root, "Error like post", Snackbar.LENGTH_INDEFINITE)
-                        .setAction("Ok") { }
-                        .show()
-
-                ErrorType.REMOVE ->
-                    Snackbar.make(binding.root, "Error remove post", Snackbar.LENGTH_INDEFINITE)
-                        .setAction("Ok") { }
-                        .show()
-
-                else -> Unit
-            }
-
         }
 
-        binding.retryButton.setOnClickListener {
-            viewModel.loadPosts()
+        binding.swiperefresh.setOnRefreshListener {
+            viewModel.refreshPosts()
         }
 
         binding.fab.setOnClickListener {

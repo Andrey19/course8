@@ -1,7 +1,5 @@
 package ru.netology.nmedia.adapter
 
-import android.R.attr.fragment
-import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +9,6 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
-import com.bumptech.glide.request.target.Target
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.AttachmentType
@@ -59,9 +56,9 @@ class PostViewHolder(
             } else{
                 attachmentImage.visibility = View.VISIBLE
                 if (post.attachment!!.type == AttachmentType.IMAGE) {
-                  attachment.visibility = View.GONE
+                    attachment.visibility = View.GONE
                 }  else{
-                  attachment.visibility = View.VISIBLE
+                    attachment.visibility = View.VISIBLE
                 }
                 val url = "http://10.0.2.2:9999/images/${post.attachment!!.url}"
 
@@ -95,10 +92,6 @@ class PostViewHolder(
                                 onInteractionListener.onRemove(post)
                                 true
                             }
-                            R.id.edit -> {
-                                onInteractionListener.onEdit(post)
-                                true
-                            }
 
                             else -> false
                         }
@@ -126,3 +119,4 @@ class PostDiffCallback : DiffUtil.ItemCallback<Post>() {
         return oldItem == newItem
     }
 }
+
