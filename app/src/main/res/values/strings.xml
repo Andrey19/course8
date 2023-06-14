@@ -16,6 +16,7 @@
     <string name="play">play</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
+    <string name="new_posts">New posts</string>
     <string name="error_saving">Error saving. Try again later</string>
     <string name="error_like">Like error. Try again later</string>
     <string name="error_unlike">Unlike error. Try again later</string>

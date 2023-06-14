@@ -82,6 +82,17 @@ class FeedFragment : Fragment() {
                 else -> {}
             }
         }
+        binding.newPostButton.setOnClickListener {
+            viewModel.updateAll()
+            binding.newPostButton.visibility = View.GONE
+            binding.list.smoothScrollToPosition(0)
+        }
+
+        viewModel.newerCount.observe(viewLifecycleOwner) {
+            binding.newPostButton.visibility = View.VISIBLE
+        }
+
+
         viewModel.data.observe(viewLifecycleOwner) { state ->
             adapter.submitList(state.posts)
             binding.emptyText.isVisible = state.empty

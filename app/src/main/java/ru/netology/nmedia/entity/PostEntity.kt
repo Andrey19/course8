@@ -14,6 +14,7 @@ data class PostEntity(
     val published: String,
     val likedByMe: Boolean,
     val likes: Int = 0,
+    val isShow: Boolean = false
 ) {
     fun toDto() = Post(id, author, authorAvatar, content, published, likedByMe, likes)
 
@@ -24,5 +25,5 @@ data class PostEntity(
     }
 }
 
-fun List<PostEntity>.toDto(): List<Post> = map(PostEntity::toDto)
-fun List<Post>.toEntity(): List<PostEntity> = map(PostEntity::fromDto)
+fun List<PostEntity>.toDto(): List<Post> = map( PostEntity::toDto)
+fun List<Post>.toEntity(): List<PostEntity> = map { PostEntity.fromDto(it).copy(isShow = true) }

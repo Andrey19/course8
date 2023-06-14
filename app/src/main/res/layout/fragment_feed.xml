@@ -9,6 +9,20 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <Button
+            android:id="@+id/newPostButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/new_posts"
+            android:visibility="gone"
+            app:icon="@drawable/up_arrow_icon"
+            style="@style/Widget.MaterialComponents.Button.Icon"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            />
+
+
         <TextView
             android:id="@+id/emptyText"
             android:layout_width="wrap_content"

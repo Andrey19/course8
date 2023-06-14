@@ -2,6 +2,9 @@ package ru.netology.nmedia.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Post
@@ -27,7 +30,10 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: PostRepository =
         PostRepositoryImpl(AppDb.getInstance(context = application).postDao())
 
-    val data: LiveData<FeedModel> = repository.data.map(::FeedModel)
+    val data: LiveData<FeedModel> = repository.data
+        .map(::FeedModel)
+        .asLiveData(Dispatchers.Default)
+
     private val _dataState = MutableLiveData<FeedModelState>()
     val dataState: LiveData<FeedModelState>
         get() = _dataState
@@ -51,6 +57,21 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    val newerCount: LiveData<Int> = data.switchMap {
+        repository.getNewerCount(it.posts.firstOrNull()?.id ?: 0L)
+            .catch { e -> e.printStackTrace() }
+            .asLiveData(Dispatchers.Default)
+    }
+
+    fun updateAll() = viewModelScope.launch {
+        try {
+            repository.updateAll()
+        } catch (e: Exception) {
+            println("Update error")
+        }
+    }
+
+
     fun refreshPosts() = viewModelScope.launch {
         try {
             _dataState.value = FeedModelState(refreshing = true)
@@ -60,6 +81,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             _dataState.value = FeedModelState(error = ErrorType.LOAD)
         }
     }
+
     fun save() {
         edited.value?.let {
             _postCreated.value = Unit
@@ -74,6 +96,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         }
         edited.value = empty
     }
+
 
     fun edit(post: Post) {
         edited.value = post
