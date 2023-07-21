@@ -11,6 +11,7 @@ import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.ErrorType
 import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.model.FeedModelState
+import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.repository.*
 import ru.netology.nmedia.util.SingleLiveEvent
 
@@ -26,7 +27,6 @@ private val empty = Post(
 )
 
 class PostViewModel(application: Application) : AndroidViewModel(application) {
-    // упрощённый вариант
     private val repository: PostRepository =
         PostRepositoryImpl(AppDb.getInstance(context = application).postDao())
 
@@ -37,6 +37,10 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     private val _dataState = MutableLiveData<FeedModelState>()
     val dataState: LiveData<FeedModelState>
         get() = _dataState
+
+    private val _photo = MutableLiveData<PhotoModel?>()
+    val photo: LiveData<PhotoModel?>
+        get() = _photo
 
     private val edited = MutableLiveData(empty)
     private val _postCreated = SingleLiveEvent<Unit>()
@@ -87,7 +91,11 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             _postCreated.value = Unit
             viewModelScope.launch {
                 try {
-                    repository.save(it)
+                    when (val photo = _photo.value){
+                        null -> repository.save(it)
+                        else -> repository.saveWithAttachment(it,photo)
+                    }
+
                     _dataState.value = FeedModelState()
                 } catch (e: Exception) {
                     _dataState.value = FeedModelState(error = ErrorType.SAVE)
@@ -147,5 +155,12 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 _dataState.value = FeedModelState(error = ErrorType.REMOVE)
             }
         }
+    }
+
+    fun clearPhoto(){
+        _photo.value = null
+    }
+    fun setPhoto(photoModel: PhotoModel) {
+       _photo.value = photoModel
     }
 }
