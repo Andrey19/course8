@@ -17,16 +17,21 @@ data class PostEntity(
     val likedByMe: Boolean,
     val likes: Int = 0,
     val isShow: Boolean = false,
-
+    @Embedded
+    var attachment: Attachment? = null
 ) {
-    fun toDto() = Post(id, author, authorAvatar, content, published, likedByMe, likes,)
+    fun toDto() = Post(id, author, authorAvatar, content, published,
+        likedByMe, likes, attachment)
 
     companion object {
-        fun fromDto(dto: Post) =
-            PostEntity(dto.id, dto.author, dto.authorAvatar, dto.content, dto.published, dto.likedByMe, dto.likes,)
+        fun fromDto(dto: Post, isShow: Boolean) =
+            PostEntity(dto.id, dto.author, dto.authorAvatar,
+                dto.content, dto.published,
+                dto.likedByMe, dto.likes, isShow, dto.attachment)
 
     }
 }
 
 fun List<PostEntity>.toDto(): List<Post> = map( PostEntity::toDto)
-fun List<Post>.toEntity(): List<PostEntity> = map { PostEntity.fromDto(it).copy(isShow = true) }
+fun List<Post>.toEntity(isShow: Boolean): List<PostEntity> = map {
+    PostEntity.fromDto(it, isShow) }

@@ -20,17 +20,22 @@ interface OnInteractionListener {
     fun onEdit(post: Post) {}
     fun onRemove(post: Post) {}
     fun onShare(post: Post) {}
+    fun onViewPhoto(post: Post) {}
 }
 
 class PostsAdapter(
     private val onInteractionListener: OnInteractionListener,
 ) : ListAdapter<Post, PostViewHolder>(PostDiffCallback()) {
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
-        val binding = CardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int):
+            PostViewHolder {
+        val binding =
+            CardPostBinding.inflate(LayoutInflater.from(parent.context), parent,
+                false)
         return PostViewHolder(binding, onInteractionListener)
     }
 
-    override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: PostViewHolder, position:
+    Int) {
         val post = getItem(position)
         holder.bind(post)
     }
@@ -46,21 +51,27 @@ class PostViewHolder(
             author.text = post.author
             published.text = post.published
             content.text = post.content
+
+
             // в адаптере
             like.isChecked = post.likedByMe
             like.text = "${post.likes}"
 
-            if (post.attachment == null || post.attachment!!.url.isEmpty()){
+
+            if (post.attachment == null ||
+                post.attachment!!.url.isEmpty()){
                 attachment.visibility = View.GONE
                 attachmentImage.visibility = View.GONE
             } else{
+
                 attachmentImage.visibility = View.VISIBLE
                 if (post.attachment!!.type == AttachmentType.IMAGE) {
                     attachment.visibility = View.GONE
                 }  else{
                     attachment.visibility = View.VISIBLE
                 }
-                val url = "http://10.0.2.2:9999/images/${post.attachment!!.url}"
+                val url =
+                    "http://10.0.2.2:9999/media/${post.attachment!!.url}"
 
                 Glide.with(binding.attachmentImage)
                     .load(url)
@@ -70,7 +81,8 @@ class PostViewHolder(
                     .into(binding.attachmentImage)
             }
             if (post.authorAvatar.isNotEmpty()) {
-                val url = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
+                val url =
+                    "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
                 val options = RequestOptions()
                 options.circleCrop()
 
@@ -83,6 +95,8 @@ class PostViewHolder(
                     .timeout(10_000)
                     .into(binding.avatar)
             }
+
+
             menu.setOnClickListener {
                 PopupMenu(it.context, it).apply {
                     inflate(R.menu.options_post)
@@ -103,6 +117,10 @@ class PostViewHolder(
                 }.show()
             }
 
+            attachmentImage.setOnClickListener {
+                onInteractionListener.onViewPhoto(post)
+            }
+
             like.setOnClickListener {
                 onInteractionListener.onLike(post)
             }
@@ -115,12 +133,13 @@ class PostViewHolder(
 }
 
 class PostDiffCallback : DiffUtil.ItemCallback<Post>() {
-    override fun areItemsTheSame(oldItem: Post, newItem: Post): Boolean {
+    override fun areItemsTheSame(oldItem: Post, newItem: Post): Boolean
+    {
         return oldItem.id == newItem.id
     }
 
-    override fun areContentsTheSame(oldItem: Post, newItem: Post): Boolean {
+    override fun areContentsTheSame(oldItem: Post, newItem: Post):
+            Boolean {
         return oldItem == newItem
     }
 }
-

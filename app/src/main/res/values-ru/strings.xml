@@ -31,4 +31,9 @@
     <string name="channel_remote_description">Уведомления с удалённого сервера</string>
     <string name="clear">clear</string>
     <string name="photo_pick_error">Photo pick error</string>
+    <string name="description_select_photo">Select photo</string>
+    <string name="description_take_photo">Take photo</string>
+    <string name="description_photo">Photo</string>
+    <string name="remove">Remove</string>
+    <string name="menu_save">Save</string>
 </resources>

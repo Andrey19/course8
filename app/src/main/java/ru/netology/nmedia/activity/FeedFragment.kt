@@ -11,6 +11,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
+import ru.netology.nmedia.activity.NewPostFragment.Companion.imageUrl
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
@@ -36,13 +37,24 @@ class FeedFragment : Fragment() {
                     R.id.action_feedFragment_to_newPostFragment,
                     Bundle().apply {
                         textArg = post.content
+                        imageUrl = post.attachment?.url
                     }
                 )
+
                 viewModel.edit(post)
             }
 
             override fun onLike(post: Post) {
                 viewModel.likeById(post.id)
+            }
+
+            override fun onViewPhoto(post: Post) {
+                findNavController().navigate(
+                    R.id.action_feedFragment_to_photoFragment,
+                    Bundle().apply {
+                        imageUrl = post.attachment?.url
+                    }
+                )
             }
 
             override fun onRemove(post: Post) {
@@ -97,6 +109,10 @@ class FeedFragment : Fragment() {
 
         viewModel.newerCount.observe(viewLifecycleOwner) {
             binding.newPostButton.visibility = View.VISIBLE
+        }
+
+        viewModel.addedPost.observe(viewLifecycleOwner) {
+            binding.list.smoothScrollToPosition(0)
         }
 
         viewModel.data.observe(viewLifecycleOwner) { state ->
