@@ -1,5 +1,6 @@
 package ru.netology.nmedia.activity
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,16 +11,18 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.imageUrl
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.ErrorType
 import ru.netology.nmedia.viewmodel.PostViewModel
-
+@ExperimentalCoroutinesApi
 class FeedFragment : Fragment() {
 
     private val viewModel: PostViewModel by activityViewModels()
@@ -45,8 +48,26 @@ class FeedFragment : Fragment() {
             }
 
             override fun onLike(post: Post) {
-                viewModel.likeById(post.id)
+                if (AppAuth.getInstance().authStateFlow.value.id == 0L) {
+                    val builder = AlertDialog.Builder(context)
+                    builder.setMessage("You need to login to like post .\n " +
+                            "Do you want to login ?")
+                    builder.setTitle("Like post")
+                    builder.setCancelable(false)
+                    builder.setPositiveButton("Yes") {
+                            _, _ ->
+                        findNavController().navigate(R.id.loginFragment)
+                    }
+                    builder.setNegativeButton("No") {
+                            dialog, _ -> dialog.cancel()
+                    }
+                    val alertDialog = builder.create()
+                    alertDialog.show()
+                } else {
+                    viewModel.likeById(post)
+                }
             }
+
 
             override fun onViewPhoto(post: Post) {
                 findNavController().navigate(
@@ -125,7 +146,26 @@ class FeedFragment : Fragment() {
         }
 
         binding.fab.setOnClickListener {
-            findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
+            if (AppAuth.getInstance().authStateFlow.value.id == 0L) {
+                val builder = AlertDialog.Builder(this.context)
+                builder.setMessage("You need to login to create new post .\n "
+                        +
+                        "Do you want to login ?")
+                builder.setTitle("Create new post")
+                builder.setCancelable(false)
+                builder.setPositiveButton("Yes") {
+                        _, _ ->
+                    findNavController().navigate(R.id.loginFragment)
+                }
+                builder.setNegativeButton("No") {
+                        dialog, _ -> dialog.cancel()
+                }
+                val alertDialog = builder.create()
+                alertDialog.show()
+            } else {
+
+                findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
+            }
         }
 
         return binding.root

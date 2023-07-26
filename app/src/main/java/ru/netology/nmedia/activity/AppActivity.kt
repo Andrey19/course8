@@ -1,21 +1,33 @@
 package ru.netology.nmedia.activity
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Toast
+import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
-
+import ru.netology.nmedia.auth.AppAuth
+import ru.netology.nmedia.viewmodel.AuthViewModel
+@ExperimentalCoroutinesApi
 class AppActivity : AppCompatActivity(R.layout.activity_app) {
+    private val viewModelAuth: AuthViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        requestNotificationsPermission()
         intent?.let {
             if (it.action != Intent.ACTION_SEND) {
                 return@let
@@ -36,7 +48,89 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                 )
         }
 
+        viewModelAuth.data.observe(this) {
+            invalidateOptionsMenu()
+        }
         checkGoogleApiAvailability()
+        requestNotificationsPermission()
+    }
+
+    private fun requestNotificationsPermission() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            return
+        }
+
+        val permission = Manifest.permission.POST_NOTIFICATIONS
+
+        if (checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED) {
+            return
+        }
+
+        requestPermissions(arrayOf(permission), 1)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+
+        menu.let {
+            it.setGroupVisible(
+                R.id.unauthenticated,
+                !viewModelAuth.authenticated
+            )
+            it.setGroupVisible(R.id.authenticated, viewModelAuth.authenticated)
+        }
+        return true
+    }
+
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.posts -> {
+                findNavController(R.id.nav_host_fragment)
+                    .navigate(
+                        R.id.feedFragment
+                    )
+                //AppAuth.getInstance().setAuth(5, "x-token")
+                true
+            }
+
+            R.id.signin -> {
+                findNavController(R.id.nav_host_fragment)
+                    .navigate(
+                        R.id.loginFragment
+                    )
+                true
+            }
+
+            R.id.signup -> {
+                findNavController(R.id.nav_host_fragment)
+                    .navigate(
+                        R.id.registerFragment,
+                    )
+                //AppAuth.getInstance().setAuth(5, "x-token")
+                true
+            }
+
+            R.id.signout -> {
+
+                val builder = AlertDialog.Builder(this)
+                builder.setMessage("Do you want to logout ?")
+                builder.setTitle("Logout")
+                builder.setCancelable(false)
+                builder.setPositiveButton("Yes") { _, _ ->
+                    AppAuth.getInstance().removeAuth()
+                }
+                builder.setNegativeButton("No") { dialog, _ ->
+                    dialog.cancel()
+                }
+                val alertDialog = builder.create()
+                alertDialog.show()
+
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     private fun checkGoogleApiAvailability() {

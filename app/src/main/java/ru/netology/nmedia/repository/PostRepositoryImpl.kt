@@ -23,6 +23,7 @@ import ru.netology.nmedia.entity.toEntity
 import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
+import ru.netology.nmedia.model.TokenModel
 import java.io.IOException
 
 
@@ -66,6 +67,41 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         .catch { e -> throw AppError.from(e) }
         .flowOn(Dispatchers.Default)
 
+    override suspend fun userLogin(login: String, password: String):
+            TokenModel {
+        try {
+            val response = PostsApi.service.userLogin(login,password)
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+
+            return response.body() ?: throw ApiError(response.code(),
+                response.message())
+
+        } catch (e: Exception) {
+            throw UnknownError
+        }
+
+
+    }
+    override suspend fun userRegister(login: String, password: String,
+                                      name: String): TokenModel {
+        try {
+            val response = PostsApi.service.userRegister(login, password,
+                name)
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+
+            return response.body() ?: throw ApiError(response.code(),
+                response.message())
+
+        } catch (e: Exception) {
+            throw UnknownError
+        }
+
+
+    }
     override suspend fun save(post: Post) {
         try {
             val response = PostsApi.service.save(post)
