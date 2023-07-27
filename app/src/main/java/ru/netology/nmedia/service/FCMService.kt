@@ -12,6 +12,7 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.Gson
 import ru.netology.nmedia.R
+import ru.netology.nmedia.auth.AppAuth
 import kotlin.random.Random
 
 
@@ -25,39 +26,45 @@ class FCMService : FirebaseMessagingService() {
         super.onCreate()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = getString(R.string.channel_remote_name)
-            val descriptionText = getString(R.string.channel_remote_description)
+            val descriptionText =
+                getString(R.string.channel_remote_description)
             val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(channelId, name, importance).apply {
+            val channel = NotificationChannel(channelId, name,
+                importance).apply {
                 description = descriptionText
             }
-            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val manager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             manager.createNotificationChannel(channel)
         }
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
-
-        message.data[action]?.let {
-           when (Action.valueOf(it)) {
-              Action.LIKE -> handleLike(gson.fromJson(message.data[content], Like::class.java))
-           }
+        val recipientId = message.data["recipientId"]?.toLong()
+        val notificationContent = message.data["content"]
+        val id = AppAuth.getInstance().authStateFlow.value.id
+        if (recipientId == id || recipientId == null) {
+            if(notificationContent != null) {
+                showNotification(notificationContent)
+            }
         }
+        if (recipientId == 0L || recipientId != id) {
+            AppAuth.getInstance().sendPushToken()
+        }
+        if (recipientId != 0L || recipientId != id) {
+            AppAuth.getInstance().sendPushToken()
+        }
+
     }
 
     override fun onNewToken(token: String) {
-        println(token)
+        AppAuth.getInstance().sendPushToken(token)
     }
 
-    private fun handleLike(content: Like) {
+    private fun showNotification(content: String) {
         val notification = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle(
-                getString(
-                    R.string.notification_user_liked,
-                    content.userName,
-                    content.postAuthor,
-                )
-            )
+            .setContentTitle(content)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
 
@@ -82,4 +89,3 @@ data class Like(
     val postId: Long,
     val postAuthor: String,
 )
-
