@@ -22,8 +22,12 @@ import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.ErrorType
 import ru.netology.nmedia.viewmodel.PostViewModel
+import javax.inject.Inject
+
 @ExperimentalCoroutinesApi
 class FeedFragment : Fragment() {
+    @Inject
+    lateinit var auth: AppAuth
 
     private val viewModel: PostViewModel by activityViewModels()
 
