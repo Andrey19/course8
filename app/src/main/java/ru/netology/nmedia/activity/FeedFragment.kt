@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.imageUrl
@@ -24,6 +25,7 @@ import ru.netology.nmedia.model.ErrorType
 import ru.netology.nmedia.viewmodel.PostViewModel
 import javax.inject.Inject
 
+@AndroidEntryPoint
 @ExperimentalCoroutinesApi
 class FeedFragment : Fragment() {
     @Inject
@@ -52,7 +54,7 @@ class FeedFragment : Fragment() {
             }
 
             override fun onLike(post: Post) {
-                if (AppAuth.getInstance().authStateFlow.value.id == 0L) {
+                if (auth.authStateFlow.value.id == 0L) {
                     val builder = AlertDialog.Builder(context)
                     builder.setMessage("You need to login to like post .\n " +
                             "Do you want to login ?")
@@ -150,7 +152,7 @@ class FeedFragment : Fragment() {
         }
 
         binding.fab.setOnClickListener {
-            if (AppAuth.getInstance().authStateFlow.value.id == 0L) {
+            if (auth.authStateFlow.value.id == 0L) {
                 val builder = AlertDialog.Builder(this.context)
                 builder.setMessage("You need to login to create new post .\n "
                         +

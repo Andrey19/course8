@@ -3,7 +3,9 @@ package ru.netology.nmedia.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.auth.AppAuth
@@ -11,13 +13,14 @@ import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.repository.PostRepository
 import ru.netology.nmedia.repository.PostRepositoryImpl
 import ru.netology.nmedia.util.SingleLiveEvent
+import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
-class LoginViewModel(application: Application) :
-    AndroidViewModel(application) {
-    private val repository: PostRepository =
-        PostRepositoryImpl(AppDb.getInstance(context =
-        application).postDao())
+@HiltViewModel
+class LoginViewModel @Inject constructor(
+    private val repository: PostRepository,
+    private val auth: AppAuth,
+) : ViewModel() {
 
     private val _userLogin = SingleLiveEvent<Boolean>()
 
@@ -29,7 +32,7 @@ class LoginViewModel(application: Application) :
         viewModelScope.launch {
             try {
                 val response = repository.userLogin(login, password)
-                AppAuth.getInstance().setAuth(response.id,
+                auth.setAuth(response.id,
                     response.token)
                 _userLogin.value = true
             } catch (e: Exception) {
