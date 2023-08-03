@@ -9,10 +9,13 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collectLatest
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.imageUrl
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
@@ -134,22 +137,32 @@ class FeedFragment : Fragment() {
             binding.list.smoothScrollToPosition(0)
         }
 
-        viewModel.newerCount.observe(viewLifecycleOwner) {
-            binding.newPostButton.visibility = View.VISIBLE
-        }
+//        viewModel.newerCount.observe(viewLifecycleOwner) {
+//            binding.newPostButton.visibility = View.VISIBLE
+//        }
 
         viewModel.addedPost.observe(viewLifecycleOwner) {
             binding.list.smoothScrollToPosition(0)
         }
 
-        viewModel.data.observe(viewLifecycleOwner) { state ->
-            adapter.submitList(state.posts)
-            binding.emptyText.isVisible = state.empty
+//        viewModel.data.observe(viewLifecycleOwner) { state ->
+//            adapter.submitList(state.posts)
+//            binding.emptyText.isVisible = state.empty
+//        }
+
+        lifecycleScope.launchWhenCreated {
+            viewModel.data.collectLatest(adapter::submitData)
         }
 
-        binding.swiperefresh.setOnRefreshListener {
-            viewModel.refreshPosts()
+        lifecycleScope.launchWhenCreated {
+            adapter.loadStateFlow.collectLatest { state ->
+                binding.swiperefresh.isRefreshing =
+                    state.refresh is LoadState.Loading ||
+                            state.prepend is LoadState.Loading ||
+                            state.append is LoadState.Loading
+            }
         }
+        binding.swiperefresh.setOnRefreshListener(adapter::refresh)
 
         binding.fab.setOnClickListener {
             if (auth.authStateFlow.value.id == 0L) {

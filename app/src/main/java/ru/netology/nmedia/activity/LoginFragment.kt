@@ -15,11 +15,14 @@ import ru.netology.nmedia.databinding.FragmentLoginBinding
 import ru.netology.nmedia.util.AndroidUtils
 import ru.netology.nmedia.util.StringArg
 import ru.netology.nmedia.viewmodel.LoginViewModel
+import ru.netology.nmedia.viewmodel.PostViewModel
+
 @AndroidEntryPoint
 @ExperimentalCoroutinesApi
 class LoginFragment : Fragment() {
 
     private val loginViewModel: LoginViewModel by activityViewModels()
+    private val viewModel: PostViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,6 +41,7 @@ class LoginFragment : Fragment() {
 
         loginViewModel.userLogin.observe(viewLifecycleOwner) {
             if (it) {
+                viewModel.loadPosts()
                 findNavController().navigateUp()
             } else {
                 Snackbar.make(binding.root, R.string.auth_error,

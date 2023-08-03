@@ -22,8 +22,8 @@ class RegisterFragment : Fragment() {
 
 
 
-    private val registerViewModel: RegisterViewModel by
-    activityViewModels()
+    private val registerViewModel: RegisterViewModel by activityViewModels()
+    private val viewModel: PostViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,6 +43,7 @@ class RegisterFragment : Fragment() {
 
         registerViewModel.userRegister.observe(viewLifecycleOwner) {
             if (it) {
+                viewModel.loadPosts()
                 findNavController().navigateUp()
             } else {
                 Snackbar.make(binding.root, R.string.register_error,

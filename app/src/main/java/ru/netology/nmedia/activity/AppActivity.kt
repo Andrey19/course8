@@ -24,6 +24,7 @@ import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.viewmodel.AuthViewModel
+import ru.netology.nmedia.viewmodel.PostViewModel
 import javax.inject.Inject
 
 
@@ -57,6 +58,7 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
     lateinit var firebaseMessaging: FirebaseMessaging
 
     private val viewModelAuth: AuthViewModel by viewModels()
+    private val viewModel: PostViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -142,7 +144,10 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                         builder.setTitle("Logout")
                         builder.setCancelable(false)
                         builder.setPositiveButton("Yes") {
-                                _, _ -> auth.removeAuth()
+                                _, _ -> (run {
+                            viewModel.loadPosts()
+                            auth.removeAuth()
+                        })
                         }
                         builder.setNegativeButton("No") {
                                 dialog, _ -> dialog.cancel()
