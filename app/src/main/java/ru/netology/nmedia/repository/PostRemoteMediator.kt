@@ -21,7 +21,7 @@ class PostRemoteMediator(
     private val postDao: PostDao,
     private val postRemoteKeyDao: PostRemoteKeyDao,
 ) : RemoteMediator<Int, PostEntity>() {
-    private var enablePrepend = false;
+    private var enablePrepend = true;
     private val enableErase= false;
     private var allKey = true;
     override suspend fun load(
