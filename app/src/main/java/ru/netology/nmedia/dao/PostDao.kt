@@ -39,8 +39,7 @@ interface PostDao {
 
     @Query("SELECT * FROM PostEntity ORDER BY id DESC")
     fun pagingSource(): PagingSource<Int, PostEntity>
-    @Query("SELECT * from PostEntity ORDER BY id DESC LIMIT 1")
-    suspend fun getMaxId(): PostEntity
+
 
     @Query("DELETE FROM PostEntity")
     suspend fun removeAll()

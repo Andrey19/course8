@@ -23,6 +23,7 @@ class PostRemoteMediator(
 ) : RemoteMediator<Int, PostEntity>() {
     private var enablePrepend = false;
     private val enableErase= false;
+    private var allKey = true;
     override suspend fun load(
         loadType: LoadType,
         state: PagingState<Int, PostEntity>
@@ -31,10 +32,17 @@ class PostRemoteMediator(
             val response = when (loadType) {
                 LoadType.REFRESH -> {
                     if(enablePrepend) {
+                        allKey = true
                         service.getLatest(state.config.initialLoadSize)
                     } else {
-                        val id = postDao.getMaxId().id
-                        service.getAfter(id, state.config.pageSize)
+                        val id = postRemoteKeyDao.max();
+                        if (id != null) {
+                            allKey = false
+                            service.getAfter(id, state.config.pageSize)
+                        } else {
+                            allKey = true
+                            service.getLatest(state.config.initialLoadSize)
+                        }
 
                     }
                 }
@@ -73,24 +81,35 @@ class PostRemoteMediator(
                             postRemoteKeyDao.removeAll()
                         }
                         postRemoteKeyDao.insert(
-                            listOf(
-                                PostRemoteKeyEntity(
-                                    type =
-                                    PostRemoteKeyEntity.KeyType.AFTER,
-                                    id = body.first().id,
-                                ),
-                                PostRemoteKeyEntity(
-                                    type =
-                                    PostRemoteKeyEntity.KeyType.BEFORE,
-                                    id = body.last().id,
-                                ),
-                            )
+                            if(allKey) {
+                                listOf(
+                                    PostRemoteKeyEntity(
+                                        type =
+                                        PostRemoteKeyEntity.KeyType.AFTER,
+                                        id = body.first().id,
+                                    ),
+                                    PostRemoteKeyEntity(
+                                        type =
+                                        PostRemoteKeyEntity.KeyType.BEFORE,
+                                        id = body.last().id,
+                                    ),
+                                )
+                            } else {
+                                listOf(
+                                    PostRemoteKeyEntity(
+                                        type =
+                                        PostRemoteKeyEntity.KeyType.AFTER,
+                                        id = body.first().id,
+                                    ),
+                                )
+                            }
                         )
                         if(enableErase) {
                             postDao.removeAll()
                         }
 
                     }
+
                     LoadType.PREPEND -> {
                         postRemoteKeyDao.insert(
                             PostRemoteKeyEntity(

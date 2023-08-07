@@ -90,11 +90,9 @@ class PostViewModel @Inject constructor(
         _photo.value = PhotoModel(uri, file)
     }
 
-
     fun loadPosts() = viewModelScope.launch {
         try {
             _dataState.value = FeedModelState(loading = true)
-            repository.getAll()
             _dataState.value = FeedModelState()
         } catch (e: Exception) {
             _dataState.value = FeedModelState(error = ErrorType.LOAD)
